@@ -1,0 +1,4 @@
+repository "3d test@Ricardo_With_Clothes@cloud"
+  path "/"
+    br "/main"
+    co "/main"

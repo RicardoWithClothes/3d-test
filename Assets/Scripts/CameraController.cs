@@ -8,8 +8,8 @@ public class CameraController : MonoBehaviour
     public float sensY;
     public Transform orientation;
 
-    float xRotation;
-    float yRotation;
+    public float xRotation;
+    public float yRotation;
     private void Start()
     {
         Cursor.lockState=CursorLockMode.Locked;
