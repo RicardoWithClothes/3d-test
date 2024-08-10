@@ -4,16 +4,20 @@ using UnityEngine;
 
 public class PlayerMovementAdvanced : MonoBehaviour
 {
+
+    public bool IsCrouching { get; private set; }
+    public bool IsFalling { get; private set; }
+
+
     [Header("Movement")]
     private float moveSpeed;
     public float walkSpeed;
     public float sprintSpeed;
     public float groundDrag;
 
-    private float desiredMoveSpeed;
-    private float lastDesiredMoveSpeed;
-
     public float jumpForce;
+    public float jumpButtonGracePeriod;
+    
     public float jumpCooldown;
     public float airMultiplier;
     bool readyToJump;
@@ -37,6 +41,10 @@ public class PlayerMovementAdvanced : MonoBehaviour
     public float maxSlopeAngle;
     private RaycastHit slopeHit;
     private bool exitingSlope;
+
+    //For jump buffer + coyote time
+    private float? lastGroundTime;
+    private float? jumpButtonPressedTime;
 
     public Transform orientation;
 
@@ -66,6 +74,8 @@ public class PlayerMovementAdvanced : MonoBehaviour
 
     private void Update()
     {
+        IsCrouching = state == MovementState.crouching;
+        IsFalling = state == MovementState.air;
         // ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.3f, whatIsGround);
 
@@ -74,10 +84,17 @@ public class PlayerMovementAdvanced : MonoBehaviour
         StateHandler();
 
         // handle drag
-        if (grounded)
+        if (grounded){
             rb.drag = groundDrag;
+            lastGroundTime = Time.time;
+        }
         else
             rb.drag = 0;
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            jumpButtonPressedTime = Time.time;
+        }
     }
 
     private void FixedUpdate()
@@ -91,7 +108,7 @@ public class PlayerMovementAdvanced : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
 
         // when to jump
-        if (Input.GetKey(jumpKey) && readyToJump && grounded)
+        if (Input.GetKey(jumpKey) && readyToJump &&  grounded)
         {
             readyToJump = false;
 
@@ -104,6 +121,7 @@ public class PlayerMovementAdvanced : MonoBehaviour
         if(Input.GetKeyDown(crouchKey))
         {
             transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+            
             rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
         }
         //stop crouching
@@ -162,7 +180,7 @@ public class PlayerMovementAdvanced : MonoBehaviour
         else if (!grounded)
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
 
-        //tirn off gravity on slope
+        //turn off gravity on slope
         rb.useGravity = !OnSlope();
 
     }
