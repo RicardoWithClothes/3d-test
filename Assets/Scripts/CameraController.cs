@@ -10,6 +10,8 @@ public class CameraController : MonoBehaviour
 
     public float xRotation;
     public float yRotation;
+
+    private bool canControl = true;
     private void Start()
     {
         Cursor.lockState=CursorLockMode.Locked;
@@ -19,6 +21,7 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!canControl) return;
         float mouseX=Input.GetAxis("Mouse X")*sensX*Time.deltaTime;
         float mouseY=Input.GetAxis("Mouse Y")*sensY*Time.deltaTime;
 
@@ -28,5 +31,9 @@ public class CameraController : MonoBehaviour
 
         transform.rotation=Quaternion.Euler(xRotation,yRotation,0);
         orientation.rotation=Quaternion.Euler(0,yRotation,0);
+    }
+    public void SetCanControl(bool value)
+    {
+        canControl = value;
     }
 }
